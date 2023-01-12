@@ -1,0 +1,39 @@
+form{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 1em;
+}
+input{
+  width: 100%;
+  border: none;
+  padding: 0.5em;
+  border-radius: 3px;
+  background-color: #EEE;
+  outline: none;
+}
+
+button{
+  cursor: pointer;
+  flex: 1;
+  border: none;
+  color: white;
+  padding: 0.5em;
+  border-radius: 3px;
+}
+
+.success{
+  background-color: #28a745;
+}
+
+.success:hover{
+  background-color: #208838;
+}
+
+.danger{
+  background-color: #dc3545;
+}
+
+.danger:hover{
+  background-color: #C82333;
+}
