@@ -1,6 +1,7 @@
 import { ProjectForm } from "./components/projectForm/projectForm";
 import { TaskElement } from "./components/task/task";
 import { TaskForm } from "./components/taskForm/taskForm";
+import { EventHandler } from "./eventHandler";
 
 const { Storage } = require("./data");
 
@@ -54,7 +55,9 @@ function loadProjectList() {
     span.innerText = taskAmount;
     projectList.appendChild(li);
     li.appendChild(span);
-    li.addEventListener("click", (e) => handleProjectClick(e.target));
+    li.addEventListener("click", (e) =>
+      EventHandler.handleProjectClick(e.target, loadProject)
+    );
   });
   projectList.appendChild(newProjectBtn);
 }
@@ -77,7 +80,6 @@ addTaskBtn.innerText = "Add Task";
 const taskForm = TaskForm;
 taskForm.form.classList.add("hidden");
 
-//loads a project
 function loadProject(id) {
   const project = Storage.getProject(id);
   projectContainer.innerHTML = "";
@@ -96,86 +98,52 @@ function loadTasks(tasks, projectId) {
     const taskElement = TaskElement(task);
     taskList.appendChild(taskElement.container);
     taskElement.checkbox.addEventListener("click", (e) => {
-      handleCheckboxClick(e.target);
-      loadTasks(tasks, projectId);
+      EventHandler.handleTaskStateChange(e.target, refresh);
     });
+    taskElement.title.addEventListener("click", (e) =>
+      EventHandler.handleEditTask(e.target)
+    );
     taskElement.delBtn.addEventListener("click", (e) => {
-      handleDeleteBtn(e.target);
-      loadTasks(tasks, projectId);
+      EventHandler.handleDeleteTask(e.target, refresh);
     });
   });
   taskList.appendChild(addTaskBtn);
   taskList.appendChild(taskForm.form);
 }
 
+function refresh(projectId) {
+  loadProject(projectId);
+  const tasks = Storage.getProject(projectId).getTasks();
+  loadTasks(tasks, projectId);
+  loadProjectList();
+  projectForm.reset();
+  taskForm.reset();
+}
+
 //EVENTS
 
 newProjectBtn.addEventListener("click", (e) => {
-  projectForm.form.classList.remove("hidden");
-  e.target.parentNode.removeChild(e.target);
+  EventHandler.handleNewProjectBtn(e.target, projectForm);
 });
 
-function handleProjectClick(projectLi) {
-  const projectId = projectLi.getAttribute("data-id");
-  loadProject(projectId);
-}
 projectForm.cancelBtn.addEventListener("click", (e) => {
-  e.preventDefault();
-  projectList.appendChild(newProjectBtn);
-  projectForm.reset();
+  EventHandler.handleFormCancel(e, projectList, projectForm, newProjectBtn);
 });
 
 projectForm.submitBtn.addEventListener("click", (e) =>
-  handleSubmitProjectBtn(e)
+  EventHandler.handleProjectSubmit(e, projectForm, refresh)
 );
 
-function handleSubmitProjectBtn(e) {
-  e.preventDefault();
-  const title = projectForm.titleInput.value;
-  if (!title) return alert("Project name can't be empty");
-  const newProject = Storage.addProject(title, []);
-  loadProject(newProject.getId());
-  loadProjectList();
-  projectForm.reset();
-}
-
-function handleCheckboxClick(checkbox) {
-  const taskId = checkbox.parentNode.getAttribute("data-id");
-  const projectId = taskId.substring(0, taskId.indexOf("-"));
-  Storage.getProject(projectId).getTask(taskId).toggleDone();
-  loadProjectList();
-}
-
-addTaskBtn.addEventListener("click", (e) => handleAddTask(e.target));
-
-function handleAddTask(button) {
-  taskForm.form.classList.remove("hidden");
-  button.parentNode.removeChild(button);
-}
+addTaskBtn.addEventListener("click", (e) =>
+  EventHandler.handleNewTaskBtn(e.target, taskForm)
+);
 
 taskForm.cancelBtn.addEventListener("click", (e) => {
-  e.preventDefault();
-  taskList.appendChild(addTaskBtn);
-  taskForm.reset();
+  EventHandler.handleFormCancel(e, taskList, taskForm, addTaskBtn);
 });
 
-taskForm.submitBtn.addEventListener("click", (e) => {
-  e.preventDefault();
-  const title = taskForm.titleInput.value;
-  if (!title) return alert("Task can't be empty");
-  const projectId = e.target.parentNode.parentNode.getAttribute("data-id");
-  const project = Storage.getProject(projectId);
-  project.addTask(title, "today", false);
-  loadProject(projectId);
-  taskForm.reset();
-  loadProjectList();
-});
-
-function handleDeleteBtn(button) {
-  const taskId = button.parentNode.getAttribute("data-id");
-  const projectId = taskId.substring(0, taskId.indexOf("-"));
-  Storage.getProject(projectId).removeTask(taskId);
-  loadProjectList();
-}
+taskForm.submitBtn.addEventListener("click", (e) =>
+  EventHandler.handleTaskSubmit(e, taskForm, refresh)
+);
 
 export { init, loadProject };
