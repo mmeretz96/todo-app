@@ -100,11 +100,11 @@ function loadTasks(tasks, projectId) {
     taskElement.checkbox.addEventListener("click", (e) => {
       EventHandler.handleTaskStateChange(e.target, refresh);
     });
-    taskElement.title.addEventListener("click", (e) =>
-      EventHandler.handleEditTask(e.target)
-    );
     taskElement.delBtn.addEventListener("click", (e) => {
       EventHandler.handleDeleteTask(e.target, refresh);
+    });
+    taskElement.calendar.addEventListener("click", (e) => {
+      EventHandler.handleCalendarClick(e.target, refresh);
     });
   });
   taskList.appendChild(addTaskBtn);

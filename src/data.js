@@ -90,9 +90,11 @@ const Project = (id, title, tasks) => {
   };
 };
 
-const Task = (id, title, dueDate, done) => {
+const Task = (id, title, dueDate = undefined, done) => {
   const getId = () => id;
   const getTitle = () => title;
+  const setDate = (date) => (dueDate = date);
+  const getDate = () => dueDate;
   const toggleDone = () => {
     if (done) {
       done = false;
@@ -106,6 +108,8 @@ const Task = (id, title, dueDate, done) => {
     getTitle,
     toggleDone,
     getDone,
+    setDate,
+    getDate,
   };
 };
 

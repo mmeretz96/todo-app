@@ -1,4 +1,5 @@
 import { Storage } from "./data";
+import Check from "./images/check.png";
 
 const EventHandler = (() => {
   const handleNewProjectBtn = (button, projectForm) => {
@@ -30,7 +31,7 @@ const EventHandler = (() => {
     const title = taskForm.titleInput.value;
     if (!title) return alert("Task can't be empty");
     const projectId = e.target.parentNode.parentNode.getAttribute("data-id");
-    Storage.getProject(projectId).addTask(title, "today", false);
+    Storage.getProject(projectId).addTask(title, undefined, false);
     refresh(projectId);
   };
 
@@ -53,18 +54,21 @@ const EventHandler = (() => {
     refresh(projectId);
   };
 
-  const handleEditTask = (title) => {
-    const taskId = title.parentNode.getAttribute("data-id");
+  const handleCalendarClick = (calendar, refresh) => {
+    const taskId = calendar.parentNode.getAttribute("data-id");
     const projectId = taskId.substring(0, taskId.indexOf("-"));
     const task = Storage.getProject(projectId).getTask(taskId);
-    if (!task.getDone()) {
-      const div = document.createElement("div");
-      const input = document.createElement("input");
-      div.classList.add("title");
-      div.appendChild(input);
-      input.value = title.innerText;
-      title.parentNode.replaceChild(div, title);
-    }
+    const datePicker = document.createElement("input");
+    datePicker.setAttribute("type", "date");
+    datePicker.addEventListener("change", () => {
+      handleAddDateToTask(task, datePicker.value, refresh, projectId);
+    });
+    calendar.parentNode.replaceChild(datePicker, calendar);
+  };
+
+  const handleAddDateToTask = (task, date, refresh, projectId) => {
+    task.setDate(date);
+    refresh(projectId);
   };
 
   return {
@@ -76,7 +80,7 @@ const EventHandler = (() => {
     handleTaskSubmit,
     handleTaskStateChange,
     handleDeleteTask,
-    handleEditTask,
+    handleCalendarClick,
   };
 })();
 
