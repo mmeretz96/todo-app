@@ -1,5 +1,4 @@
 import { Storage } from "./data";
-import Check from "./images/check.png";
 
 const EventHandler = (() => {
   const handleNewProjectBtn = (button, projectForm) => {
@@ -81,6 +80,7 @@ const EventHandler = (() => {
     handleTaskStateChange,
     handleDeleteTask,
     handleCalendarClick,
+    handleAddDateToTask,
   };
 })();
 

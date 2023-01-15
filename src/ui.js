@@ -3,6 +3,8 @@ import { TaskElement } from "./components/task/task";
 import { TaskForm } from "./components/taskForm/taskForm";
 import { EventHandler } from "./eventHandler";
 
+import { differenceInDays, parseISO } from "date-fns";
+
 const { Storage } = require("./data");
 
 const body = document.body;
@@ -27,6 +29,14 @@ const sidebar = document.createElement("div");
 sidebar.classList.add("sidebar");
 content.appendChild(sidebar);
 
+const todayHeading = document.createElement("h3");
+todayHeading.innerText = "//TODAY";
+sidebar.appendChild(todayHeading);
+
+const weekHeading = document.createElement("h3");
+weekHeading.innerText = "//THIS WEEK";
+sidebar.appendChild(weekHeading);
+
 const projectHeading = document.createElement("h3");
 projectHeading.innerText = "///PROJECTS";
 sidebar.appendChild(projectHeading);
@@ -47,6 +57,7 @@ newProjectBtn.classList.add("new-project-btn");
 function loadProjectList() {
   projectList.innerHTML = "";
   Storage.projects.forEach((project) => {
+    if (project.getTitle() === "Today" || project.getTitle() === "Week") return;
     const li = document.createElement("li");
     li.setAttribute("data-id", project.getId());
     li.innerText = project.getTitle();
@@ -111,6 +122,26 @@ function loadTasks(tasks, projectId) {
   taskList.appendChild(taskForm.form);
 }
 
+const fillDayAndWeek = () => {
+  const currentDate = new Date();
+  const allTasks = Storage.getAllTasks();
+  const todayProject = Storage.getProject("0");
+  const weekProject = Storage.getProject("1");
+  allTasks.forEach((task) => {
+    const taskDate = task.getDate();
+    if (task.getDate()) {
+      const diff = Math.abs(differenceInDays(currentDate, parseISO(taskDate)));
+      if (diff < 7) {
+        weekProject.addExistingTask(task);
+      }
+      if (diff < 2) {
+        console.log("ok");
+        todayProject.addExistingTask(task);
+      }
+    }
+  });
+};
+
 function refresh(projectId) {
   loadProject(projectId);
   const tasks = Storage.getProject(projectId).getTasks();
@@ -121,6 +152,13 @@ function refresh(projectId) {
 }
 
 //EVENTS
+todayHeading.addEventListener("click", (e) => {
+  fillDayAndWeek();
+  loadProject("0");
+});
+weekHeading.addEventListener("click", (e) => {
+  loadProject("1");
+});
 
 newProjectBtn.addEventListener("click", (e) => {
   EventHandler.handleNewProjectBtn(e.target, projectForm);

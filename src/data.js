@@ -29,6 +29,16 @@ const Storage = (() => {
     return found;
   };
 
+  const getAllTasks = () => {
+    const allTasks = [];
+    projects.forEach((project) => {
+      project.getTasks().forEach((task) => {
+        allTasks.push(task);
+      });
+    });
+    return allTasks;
+  };
+
   const getProjects = () => projects;
 
   return {
@@ -37,6 +47,7 @@ const Storage = (() => {
     addProject,
     removeProject,
     getProject,
+    getAllTasks,
   };
 })();
 
@@ -50,6 +61,15 @@ const Project = (id, title, tasks) => {
     const newTask = Task(`${id}-${nextId}`, title, dueDate, priority, done);
     tasks.push(newTask);
     nextId++;
+  };
+  const resetTasks = () => {
+    tasks = [];
+  };
+  const addExistingTask = (newTask) => {
+    if (getTask(newTask.getId()) != -1) {
+      return;
+    }
+    tasks.push(newTask);
   };
   const getOpenTasks = () => {
     const list = [];
@@ -87,6 +107,8 @@ const Project = (id, title, tasks) => {
     removeTask,
     getTask,
     getOpenTasks,
+    addExistingTask,
+    resetTasks,
   };
 };
 
