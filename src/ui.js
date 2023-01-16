@@ -3,8 +3,6 @@ import { TaskElement } from "./components/task/task";
 import { TaskForm } from "./components/taskForm/taskForm";
 import { EventHandler } from "./eventHandler";
 
-import { differenceInDays, parseISO } from "date-fns";
-
 const { Storage } = require("./data");
 
 const body = document.body;
@@ -122,26 +120,6 @@ function loadTasks(tasks, projectId) {
   taskList.appendChild(taskForm.form);
 }
 
-const fillDayAndWeek = () => {
-  const currentDate = new Date();
-  const allTasks = Storage.getAllTasks();
-  const todayProject = Storage.getProject("0");
-  const weekProject = Storage.getProject("1");
-  allTasks.forEach((task) => {
-    const taskDate = task.getDate();
-    if (task.getDate()) {
-      const diff = Math.abs(differenceInDays(currentDate, parseISO(taskDate)));
-      if (diff < 7) {
-        weekProject.addExistingTask(task);
-      }
-      if (diff < 2) {
-        console.log("ok");
-        todayProject.addExistingTask(task);
-      }
-    }
-  });
-};
-
 function refresh(projectId) {
   loadProject(projectId);
   const tasks = Storage.getProject(projectId).getTasks();
@@ -151,13 +129,37 @@ function refresh(projectId) {
   taskForm.reset();
 }
 
+function loadTasksByDate(title, range) {
+  const tasks = Storage.getTasksWithinDayRange(range);
+  projectContainer.innerHTML = "";
+
+  projectH2.innerText = title;
+  projectContainer.appendChild(projectH2);
+
+  taskList.innerHTML = "";
+  tasks.forEach((task) => {
+    const taskElement = TaskElement(task);
+    taskList.appendChild(taskElement.container);
+    taskElement.checkbox.addEventListener("click", (e) => {
+      EventHandler.handleTaskStateChange(e.target, null);
+      loadTasksByDate(title, range);
+      loadProjectList();
+    });
+    taskElement.delBtn.addEventListener("click", (e) => {
+      EventHandler.handleDeleteTask(e.target, null);
+      loadTasksByDate(title, range);
+      loadProjectList();
+    });
+  });
+  projectContainer.appendChild(taskList);
+}
+
 //EVENTS
 todayHeading.addEventListener("click", (e) => {
-  fillDayAndWeek();
-  loadProject("0");
+  loadTasksByDate("Today", 1);
 });
 weekHeading.addEventListener("click", (e) => {
-  loadProject("1");
+  loadTasksByDate("This Week", 8);
 });
 
 newProjectBtn.addEventListener("click", (e) => {

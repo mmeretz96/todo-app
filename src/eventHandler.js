@@ -1,4 +1,5 @@
 import { Storage } from "./data";
+import Check from "./images/check.png";
 
 const EventHandler = (() => {
   const handleNewProjectBtn = (button, projectForm) => {
@@ -43,14 +44,14 @@ const EventHandler = (() => {
     const taskId = checkbox.parentNode.getAttribute("data-id");
     const projectId = taskId.substring(0, taskId.indexOf("-"));
     Storage.getProject(projectId).getTask(taskId).toggleDone();
-    refresh(projectId);
+    if (refresh) refresh(projectId);
   };
 
   const handleDeleteTask = (button, refresh) => {
     const taskId = button.parentNode.getAttribute("data-id");
     const projectId = taskId.substring(0, taskId.indexOf("-"));
     Storage.getProject(projectId).removeTask(taskId);
-    refresh(projectId);
+    if (refresh) refresh(projectId);
   };
 
   const handleCalendarClick = (calendar, refresh) => {
@@ -80,7 +81,6 @@ const EventHandler = (() => {
     handleTaskStateChange,
     handleDeleteTask,
     handleCalendarClick,
-    handleAddDateToTask,
   };
 })();
 

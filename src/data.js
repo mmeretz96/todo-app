@@ -1,3 +1,4 @@
+import { differenceInDays, parseISO } from "date-fns";
 import { TaskElement } from "./components/task/task";
 
 const Storage = (() => {
@@ -39,6 +40,24 @@ const Storage = (() => {
     return allTasks;
   };
 
+  const getTasksWithinDayRange = (range) => {
+    const tasks = [];
+    const currentDate = new Date();
+    const allTasks = getAllTasks();
+    allTasks.forEach((task) => {
+      const taskDate = task.getDate();
+      if (task.getDate()) {
+        const diff = Math.abs(
+          differenceInDays(currentDate, parseISO(taskDate))
+        );
+        if (diff < range) {
+          tasks.push(task);
+        }
+      }
+    });
+    return tasks;
+  };
+
   const getProjects = () => projects;
 
   return {
@@ -48,6 +67,7 @@ const Storage = (() => {
     removeProject,
     getProject,
     getAllTasks,
+    getTasksWithinDayRange,
   };
 })();
 
@@ -64,12 +84,6 @@ const Project = (id, title, tasks) => {
   };
   const resetTasks = () => {
     tasks = [];
-  };
-  const addExistingTask = (newTask) => {
-    if (getTask(newTask.getId()) != -1) {
-      return;
-    }
-    tasks.push(newTask);
   };
   const getOpenTasks = () => {
     const list = [];
@@ -107,7 +121,6 @@ const Project = (id, title, tasks) => {
     removeTask,
     getTask,
     getOpenTasks,
-    addExistingTask,
     resetTasks,
   };
 };
